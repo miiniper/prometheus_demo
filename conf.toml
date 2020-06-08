@@ -1,0 +1,8 @@
+[server]
+ip =":8088"
+
+[db]
+addr = "10.80.137.191:27017"
+dbuser = "root"
+dbpass = "rootpwd"
+
