@@ -4,13 +4,45 @@ import (
 	"fmt"
 
 	"github.com/fsnotify/fsnotify"
+
 	"github.com/miiniper/loges"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
-	"gopkg.in/mgo.v2"
-	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
+
+	monitorv1 "github.com/coreos/prometheus-operator/pkg/client/versioned/typed/monitoring/v1"
+	"gopkg.in/mgo.v2"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
+
+func ProGetA() {
+	cfg := GetConfig("tencent-c")
+	if cfg.ClusterName == "" {
+		loges.Loges.Error("get cluster config error")
+	}
+	config, err := clientcmd.RESTConfigFromKubeConfig([]byte(cfg.ConfigFile))
+	if err != nil {
+		loges.Loges.Error("REST Config From KubeConfig is err:", zap.Error(err))
+	}
+
+	//clientset, err := versioned.NewForConfig(config)
+	//if err != nil {
+	//	loges.Loges.Error("REST Config From Config is err:", zap.Error(err))
+	//}
+
+	clientSet, err := monitorv1.NewForConfig(config)
+	if err != nil {
+		loges.Loges.Error("REST Config From Config is err:", zap.Error(err))
+	}
+
+	proRuleInt := clientSet.PrometheusRules("checkelk-sre-k8s-loda")
+	plist, err := proRuleInt.Get("tencentc-cpu", metav1.GetOptions{})
+	if err != nil {
+		loges.Loges.Error("get PrometheusRules list  err:", zap.Error(err))
+	}
+	fmt.Println(plist)
+
+}
 
 func main() {
 	fmt.Println("server starting...")
@@ -26,7 +58,7 @@ func main() {
 	viper.OnConfigChange(func(e fsnotify.Event) {
 		loges.Loges.Info("Config file changed: ", zap.Any("", e.Name))
 	})
-	Init()
+
 	ProGetA()
 
 }
@@ -46,11 +78,7 @@ type HttpStatus struct {
 
 var ClusterCfgs K8sConfigs
 
-func Init() {
-	ClusterCfgs = GetConfig()
-}
-
-func GetConfig() K8sConfigs {
+func GetConfig(ClusterName string) K8sConfig {
 	session, err := mgo.Dial(viper.GetString("db.addr"))
 	if err != nil {
 		loges.Loges.Error("conn mgo is err:", zap.Error(err))
@@ -68,34 +96,12 @@ func GetConfig() K8sConfigs {
 		loges.Loges.Error("select db is err:", zap.Error(err))
 	}
 
-	return aa
-}
-
-func K8sCli(k8sCfg string) (*kubernetes.Clientset, error) {
-	config, err := clientcmd.RESTConfigFromKubeConfig([]byte(k8sCfg))
-	if err != nil {
-		loges.Loges.Error("REST Config From KubeConfig is err:", zap.Error(err))
-		return nil, err
-	}
-
-	cli, err := kubernetes.NewForConfig(config)
-	if err != nil {
-		loges.Loges.Error("new KubeConfig is err:", zap.Error(err))
-		return nil, err
-	}
-	return cli, nil
-
-}
-
-func ProGetA() {
-	for _, ClusterCfg := range ClusterCfgs {
-		cli, _ := K8sCli(ClusterCfg.ConfigFile)
-		s1, err := cli.ServerResourcesForGroupVersion("monitoring.coreos.com/v1")
-		if err != nil {
-			loges.Loges.Error(" err:", zap.Error(err))
+	for _, j := range aa {
+		if j.ClusterName == ClusterName {
+			return j
 		}
-
-		fmt.Println(s1)
-
 	}
+
+	return K8sConfig{}
+
 }
