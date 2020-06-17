@@ -11,6 +11,7 @@ require (
 	github.com/miiniper/loges v0.0.0-20200514030821-7ee50219ef6b
 	github.com/spf13/viper v1.7.0
 	go.uber.org/zap v1.15.0
+	golang.org/x/tools v0.0.0-20191112195655-aa38f8e97acc
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/mgo.v2 v2.0.0-20190816093944-a6b53ec6cb22
 	k8s.io/api v0.0.0-20181027024800-9fcf73cc980b // indirect
