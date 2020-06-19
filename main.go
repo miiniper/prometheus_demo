@@ -34,23 +34,23 @@ func ProGetA(ClusterName string) *monitorv1.PrometheusRule {
 	//fmt.Println("Name: ", plist.Name)
 	//fmt.Println("Annotations: ", plist.Annotations)
 	//fmt.Println("APIVersion: ", plist.APIVersion)
-	fmt.Println("TypeMeta: ", plist.Kind)
+	//fmt.Println("TypeMeta: ", plist.Kind)
 	//	fmt.Println("ObjectMeta: ", plist.ObjectMeta)
 	//fmt.Println("plist.Spec.Groups[0].Name    : ", plist.Spec.Groups[0].Name)
 	//fmt.Println("plist.Spec.Groups[0].Rules   : ", plist.Spec.Groups[0].Rules)
 	//fmt.Println("plist.Spec.Groups[0].Interval: ", plist.Spec.Groups[0].Interval)
 
-	fmt.Println("=============================================================")
-	fmt.Println("pplist.Spec.Groups[0].Rules[0].Annotations: ", plist.Spec.Groups[0].Rules[0].Annotations)
-	fmt.Println("plist.Spec.Groups[0].Rules[0].Alert       : ", plist.Spec.Groups[0].Rules[0].Alert)
-	fmt.Println("plist.Spec.Groups[0].Rules[0].Expr        : ", plist.Spec.Groups[0].Rules[0].Expr)
-	fmt.Println("plist.Spec.Groups[0].Rules[0].For         : ", plist.Spec.Groups[0].Rules[0].For)
-	fmt.Println("plist.Spec.Groups[0].Rules[0].Labels      : ", plist.Spec.Groups[0].Rules[0].Labels)
-	fmt.Println("plist.Spec.Groups[0].Rules[0].Record      : ", plist.Spec.Groups[0].Rules[0].Record)
-	fmt.Println("=============================================================")
-	fmt.Println("plist.Spec.Groups[0].Rules[0].Expr.IntVal: ", plist.Spec.Groups[0].Rules[0].Expr.IntVal)
-	fmt.Println("plist.Spec.Groups[0].Rules[0].Expr.StrVal: ", plist.Spec.Groups[0].Rules[0].Expr.StrVal)
-	fmt.Println("plist.Spec.Groups[0].Rules[0].Expr.Type  : ", plist.Spec.Groups[0].Rules[0].Expr.Type)
+	//fmt.Println("=============================================================")
+	//fmt.Println("pplist.Spec.Groups[0].Rules[0].Annotations: ", plist.Spec.Groups[0].Rules[0].Annotations)
+	//fmt.Println("plist.Spec.Groups[0].Rules[0].Alert       : ", plist.Spec.Groups[0].Rules[0].Alert)
+	//fmt.Println("plist.Spec.Groups[0].Rules[0].Expr        : ", plist.Spec.Groups[0].Rules[0].Expr)
+	//fmt.Println("plist.Spec.Groups[0].Rules[0].For         : ", plist.Spec.Groups[0].Rules[0].For)
+	//fmt.Println("plist.Spec.Groups[0].Rules[0].Labels      : ", plist.Spec.Groups[0].Rules[0].Labels)
+	//fmt.Println("plist.Spec.Groups[0].Rules[0].Record      : ", plist.Spec.Groups[0].Rules[0].Record)
+	//fmt.Println("=============================================================")
+	//fmt.Println("plist.Spec.Groups[0].Rules[0].Expr.IntVal: ", plist.Spec.Groups[0].Rules[0].Expr.IntVal)
+	//fmt.Println("plist.Spec.Groups[0].Rules[0].Expr.StrVal: ", plist.Spec.Groups[0].Rules[0].Expr.StrVal)
+	//fmt.Println("plist.Spec.Groups[0].Rules[0].Expr.Type  : ", plist.Spec.Groups[0].Rules[0].Expr.Type)
 
 	return plist
 
@@ -77,9 +77,11 @@ func ProSetA(ClusterName string) {
 	//s1.Spec.Groups[0].Rules[0].For = "5s"
 	//s1.Spec.Groups[0].Rules[0].Labels = map[string]string{"cluster": "tencent-c", "monitoring": "tencentc-mem", "namespace": "checkelk-sre-k8s-loda"}
 
-	s1 := monitorv1.PrometheusRule{}
+	//s1 := monitorv1.PrometheusRule{}
 
-	plist, err := proRuleInt.Create(&s1)
+	s1 := generateHugePrometheusRule("checkelk-sre-k8s-loda", "han-test")
+
+	plist, err := proRuleInt.Create(s1)
 	if err != nil {
 		loges.Loges.Error("Set PrometheusRules  err:", zap.Error(err))
 	}
@@ -103,7 +105,7 @@ func MakeBasicRule(ns, name string, groups []monitorv1.RuleGroup) *monitorv1.Pro
 }
 
 func generateHugePrometheusRule(ns, identifier string) *monitorv1.PrometheusRule {
-	alertName := "my-alert"
+	alertName := "han-alert"
 	groups := []monitorv1.RuleGroup{
 		{
 			Name:  alertName,
@@ -111,7 +113,8 @@ func generateHugePrometheusRule(ns, identifier string) *monitorv1.PrometheusRule
 		},
 	}
 	// One rule marshaled as yaml is ~34 bytes long, the max is ~524288 bytes.
-	for i := 0; i < 12000; i++ {
+	//	for i := 0; i < 12000; i++ {
+	for i := 0; i < 3; i++ {
 		groups[0].Rules = append(groups[0].Rules, monitorv1.Rule{
 			Alert: alertName + "-" + identifier,
 			Expr:  intstr.FromString("vector(1)"),
